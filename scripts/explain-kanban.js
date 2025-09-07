@@ -66,13 +66,17 @@ async function main() {
   const parsed = tasks.find(t => t.title.startsWith('Parse and explain'))?.result;
   const md = tasks.find(t => t.title.startsWith('Render Markdown'))?.result;
 
-  // Infer format directory
+  // Output to a single user-friendly folder: ./output
   const fmt = (parsed?.format || parsed?.explained?.format || 'UNKNOWN').toUpperCase();
-  const outDir = path.resolve(process.cwd(), 'artifacts', fmt);
+  const inputBase = path.basename(file, path.extname(file));
+  const prefix = fmt && fmt !== 'UNKNOWN' ? `${fmt}_${inputBase}` : inputBase;
+  const outDir = path.resolve(process.cwd(), 'output');
   await fs.mkdir(outDir, { recursive: true });
-  await fs.writeFile(path.join(outDir, 'explained.json'), JSON.stringify(parsed?.explained || parsed, null, 2), 'utf8');
-  await fs.writeFile(path.join(outDir, 'explained.md'), md?.markdown || String(md || ''), 'utf8');
-  console.log(`Wrote artifacts to ${outDir} (explained.json, explained.md)`);
+  const jsonPath = path.join(outDir, `${prefix}.explained.json`);
+  const mdPath = path.join(outDir, `${prefix}.explained.de.md`);
+  await fs.writeFile(jsonPath, JSON.stringify(parsed?.explained || parsed, null, 2), 'utf8');
+  await fs.writeFile(mdPath, md?.markdown || String(md || ''), 'utf8');
+  console.log(`Wrote Explain Team outputs to ${outDir} (${path.basename(jsonPath)}, ${path.basename(mdPath)})`);
 }
 
 main().catch((e) => { console.error(e); process.exit(1); });

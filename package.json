@@ -12,8 +12,24 @@
     "build": "echo 'No build step needed for JS'",
     "test": "node ./tests/smoke.test.js || echo 'No tests yet'"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "STROMDAO GmbH <dev@stromdao.com>",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/energychain/willi-agent.git"
+  },
+  "homepage": "https://stromhaltig.de/",
+  "bugs": {
+    "url": "https://github.com/energychain/willi-agent/issues"
+  },
+  "keywords": [
+    "EDIFACT",
+    "KaibanJS",
+    "Qdrant",
+    "Gemini",
+    "Market Communication",
+    "Energiewirtschaft"
+  ],
   "description": "Agents and tools to parse EDIFACT to JSON using KaibanJS and Qdrant-backed specs",
   "dependencies": {
     "@langchain/community": "0.3.41",
