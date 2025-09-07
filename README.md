@@ -79,6 +79,18 @@ Ergebnisse pro Format landen unter `artifacts/<FORMAT>/`:
 - `tests.json` – Testergebnisse
 - `workflowLogs.json` und `status.txt` – Lauf- und Statusprotokolle
 
+### Bereits generierte Parser (Stand: automatisch aus `artifacts/` ermittelt)
+- APERAK
+- INVOIC
+- MSCONS
+- ORDERS
+- PARTIN
+- QUOTES
+- REMADV
+- UTILMD
+- UTILTS
+- UITLTS
+
 Nützliche Umgebungsvariablen für die Pipeline:
 - `ONLY_FORMATS=APERAK,INVOIC` – nur diese Formate verarbeiten
 - `STOP_AFTER_FORMAT=APERAK` – nach diesem Format anhalten
