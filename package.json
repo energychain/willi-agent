@@ -1,0 +1,31 @@
+{
+  "name": "willi-agent",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+  "start": "node src/index.js",
+  "explain": "node scripts/explain-all.js",
+  "explain-one": "node scripts/explain.js",
+  "explain-kanban": "node scripts/explain-kanban.js",
+    "dev": "node --watch src/index.js",
+    "build": "echo 'No build step needed for JS'",
+    "test": "node ./tests/smoke.test.js || echo 'No tests yet'"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "Agents and tools to parse EDIFACT to JSON using KaibanJS and Qdrant-backed specs",
+  "dependencies": {
+    "@langchain/community": "0.3.41",
+    "@langchain/core": "^0.3.66",
+    "@langchain/google-genai": "^0.2.5",
+    "@qdrant/js-client-rest": "^1.11.0",
+    "axios": "^1.11.0",
+    "dotenv": "^16.4.5",
+    "kaibanjs": "^0.21.1",
+    "langchain": "0.3.24",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "zod": "^3.23.8"
+  }
+}
