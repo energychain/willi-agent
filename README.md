@@ -100,6 +100,15 @@ Hinweise:
 - Das Explain-Team verwendet standardmäßig Deutsch (de) für das Markdown.
 - Falls vorhanden, wird ein generierter Parser aus `artifacts/<FORMAT>/parser.js` genutzt; sonst greift ein Basis-Parser.
 
+### BDEW-Code-Auflösung (Sender/Empfänger)
+In jeder Nachricht sind Sender (UNB/02/01) und Empfänger (UNB/03/01) über BDEW-Codes identifiziert. Das Explain-Team löst diese optional in sprechende Namen auf. Dazu wird eine veröffentlichte JSON genutzt:
+
+- Standardquelle: `https://stromhaltig.de/data/marktpartnersuche-export-20250905/table-001.json`
+- Optional konfigurierbar via `.env`: `BDEW_CODES_URL=<eigene URL>`
+- Lokale Datei bevorzugen: Lege `bdewcodes.json` ins Projekt-Root oder setze `BDEW_CODES_PATH=/pfad/zu/bdewcodes.json`. Das Tool erkennt Tabellenformate `{ headers, rows }` sowie Arrays von Objekten.
+
+Die aufgelösten Namen werden im Markdown hinter den IDs in Klammern angezeigt, z. B. `9900295000008 (Beispiel GmbH)`.
+
 ## Weitere Startpunkte und Skripte
 
 - Einzelne Beispiel-Datei mit vorhandenem Parser erklären (legt `explained.json` unter `artifacts/<FORMAT>/` ab):

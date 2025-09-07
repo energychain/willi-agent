@@ -12,7 +12,7 @@ function mdEscape(s) {
 
 export function createExplainedToMarkdownTool() {
   return tool(
-    async ({ explained, title, language }) => {
+  async ({ explained, title, language }) => {
       const lang = (language || 'en').toLowerCase();
       const i18n = {
         en: {
@@ -29,16 +29,24 @@ export function createExplainedToMarkdownTool() {
         }
       };
       const t = i18n[lang] || i18n.en;
-      const ex = explained?.explanations || explained?.explained?.explanations || {};
+      // Coerce string inputs
+      let root = explained;
+      if (typeof root === 'string') {
+        try { root = JSON.parse(root); } catch {}
+      }
+      const ex = root?.explanations || root?.explained?.explanations || {};
+      const base = root?.json || root?.explained?.json || {};
+      const ctx = root?._context || root?.explained?._context || {};
+      const bdewNames = ctx.bdewNamesByCode || {};
       const segments = ex.segments || [];
       const lines = [];
       if (title) lines.push(`# ${title}`);
       lines.push('');
       // Overview / Überblick
       lines.push(`## ${t.overview}`);
-      const fmt = explained?.format || explained?.explained?.format || 'UNKNOWN';
+  const fmt = root?.format || root?.explained?.format || 'UNKNOWN';
       lines.push(`- ${t.format}: ${fmt}`);
-      if (explained?.json?.segments?.length) lines.push(`- ${t.segments}: ${explained.json.segments.length}`);
+  if (base?.segments?.length) lines.push(`- ${t.segments}: ${base.segments.length}`);
       lines.push('');
 
       // Group by segment tag
@@ -53,7 +61,7 @@ export function createExplainedToMarkdownTool() {
         const desc = segs[0]?.description || '';
         if (desc) lines.push(desc);
         lines.push('');
-        if (isTabular(tag) && segs.length > 1) {
+  if (isTabular(tag) && segs.length > 1) {
           // Build a table across repeated instances using common fields
           const allFields = new Map();
           for (const s of segs) {
@@ -67,7 +75,19 @@ export function createExplainedToMarkdownTool() {
           for (const s of segs) {
             const row = headers.map(h => {
               const field = (s.fields || []).find(f => (f.name || f.path) === h);
-              return mdEscape(field?.value ?? '');
+              let v = field?.value;
+              // Enrich NAD Party id (3039) with BDEW speaking name
+              if (tag === 'NAD' && field) {
+                const isPartyId = (field.name || '').startsWith('Party id') || (typeof field.path === 'string' && /NAD\/02\/01$/.test(field.path));
+                if (isPartyId) {
+                  const code = String(v ?? '');
+                  const name = bdewNames[code];
+                  if (name && typeof name === 'string' && name.trim() && name.trim() !== code && name.trim() !== 'Unbekannt') {
+                    v = `${code} (${name.trim()})`;
+                  }
+                }
+              }
+              return mdEscape(v ?? '');
             });
             lines.push('|' + row.join('|') + '|');
           }
@@ -79,7 +99,27 @@ export function createExplainedToMarkdownTool() {
             for (const f of (s.fields || [])) {
               const label = f.name || f.path;
               const detail = f.description ? ` — ${f.description}` : '';
-              lines.push(`- ${mdEscape(label)}: ${mdEscape(f.value)}${detail}`);
+              let value = String(f.value ?? '');
+              // Special case: UNB sender/recipient IDs -> append speaking name if known
+              if (tag === 'UNB') {
+                const isSender = label.startsWith('Sender id') || (typeof f.path === 'string' && /UNB\/02\/01$/.test(f.path));
+                const isRecipient = label.startsWith('Recipient id') || (typeof f.path === 'string' && /UNB\/03\/01$/.test(f.path));
+                if (isSender || isRecipient) {
+                  const name = bdewNames[value];
+                  if (name && typeof name === 'string' && name.trim() && name.trim() !== value && name.trim() !== 'Unbekannt') {
+                    value = `${value} (${name.trim()})`;
+                  }
+                }
+              } else if (tag === 'NAD') {
+                const isPartyId = label.startsWith('Party id') || (typeof f.path === 'string' && /NAD\/02\/01$/.test(f.path));
+                if (isPartyId) {
+                  const name = bdewNames[value];
+                  if (name && typeof name === 'string' && name.trim() && name.trim() !== value && name.trim() !== 'Unbekannt') {
+                    value = `${value} (${name.trim()})`;
+                  }
+                }
+              }
+              lines.push(`- ${mdEscape(label)}: ${mdEscape(value)}${detail}`);
             }
             lines.push('');
           }

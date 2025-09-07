@@ -1,6 +1,18 @@
 node_modules/
 .env
-artifacts/
-output/
 .npm/
 MAKO_SAMPLES/
+output/
+
+# Artifacts: keep stable deliverables, ignore volatile outputs
+artifacts/*
+!artifacts/**/
+!artifacts/**/parser.js
+!artifacts/**/spec.json
+!artifacts/**/search-plan.json
+# Still ignore test/log/status and derived explain files
+artifacts/**/tests.json
+artifacts/**/workflowLogs.json
+artifacts/**/status.txt
+artifacts/**/explained.json
+artifacts/explain-summary.json

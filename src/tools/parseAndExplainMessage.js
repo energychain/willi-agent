@@ -165,7 +165,16 @@ function baselineParseAndExplain(text, assumedFormat) {
     return { segment: s.tag, position: s.position, description: segDesc, fields };
   };
   const explanations = { segments: segs.map(explainSegment) };
-  return { json, errors, explanations, format: fmt || assumedFormat };
+  // Extract UNB sender/recipient for optional BDEW enrichment downstream
+  const unb = segs.find(s => s.tag === 'UNB');
+  const context = {};
+  if (unb) {
+    const sender = unb.elements?.[1]?.[0]; // UNB/02/01 Sender id (0004)
+    const recipient = unb.elements?.[2]?.[0]; // UNB/03/01 Recipient id (0010)
+    context.senderId = sender;
+    context.recipientId = recipient;
+  }
+  return { json, errors, explanations, format: fmt || assumedFormat, _context: context };
 }
 
 export function createParseAndExplainMessageTool() {
@@ -233,7 +242,17 @@ export function createParseAndExplainMessageTool() {
             const parsed = await mod.parseEdifactToJson(text);
             const explained = await mod.explain(parsed);
             const fmt2 = detectFromParsed(parsed) || detectFromParsed(explained) || fmt;
-            return { explained, format: fmt2 || 'UNKNOWN' };
+            // Try to read sender/recipient from explained.json if available
+            let context = {};
+            try {
+              const segs = explained?.json?.segments || [];
+              const unb = segs.find(s => (s.tag || '').toUpperCase() === 'UNB');
+              if (unb) {
+                context.senderId = unb.elements?.[1]?.[0];
+                context.recipientId = unb.elements?.[2]?.[0];
+              }
+            } catch {}
+            return { explained: { ...explained, _context: context }, format: fmt2 || 'UNKNOWN' };
           }
         } catch {
           // fall through to baseline
@@ -248,8 +267,8 @@ export function createParseAndExplainMessageTool() {
           if (cand) fmt = cand.toUpperCase();
         }
       }
-      const explained = baselineParseAndExplain(text, fmt);
-      return { explained, format: explained.format || fmt || 'UNKNOWN' };
+  const explained = baselineParseAndExplain(text, fmt);
+  return { explained, format: explained.format || fmt || 'UNKNOWN' };
     },
     {
       name: 'parse_and_explain_message',
