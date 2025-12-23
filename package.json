@@ -33,7 +33,7 @@
   "description": "Agents and tools to parse EDIFACT to JSON using KaibanJS and Qdrant-backed specs",
   "dependencies": {
     "@langchain/community": "0.3.41",
-    "@langchain/core": "^0.3.66",
+    "@langchain/core": "^0.3.80",
     "@langchain/google-genai": "^0.2.5",
     "@qdrant/js-client-rest": "^1.11.0",
     "axios": "^1.11.0",
